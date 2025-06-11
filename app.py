@@ -37,10 +37,10 @@ def encrypt_data(plaintext: bytes) -> bytes:
 
 # --- Streamlit Web App Interface ---
 
-st.set_page_config(page_title="Thermal-Crypt Editor", layout="centered")
+st.set_page_config(page_title="MiThermal Editor", layout="centered")
 
-st.title("Thermal-Crypt Web Editor")
-st.markdown("Decrypt, edit, and re-encrypt mi_thermald .conf files directly in your browser.")
+st.title("MiThermal Interactive Editor")
+st.markdown("Внимание! Все изменения пар target-trig (частота-температура) вы делаете только на свой риск.")
 
 # Initialize session state to hold the data between reruns
 if 'decrypted_text' not in st.session_state:
@@ -49,15 +49,15 @@ if 'original_filename' not in st.session_state:
     st.session_state.original_filename = "encrypted.conf"
 
 # --- Step 1: File Upload ---
-st.header("1. Upload and Decrypt File")
-uploaded_file = st.file_uploader("Choose a .conf file", type=['conf'])
+st.header("")
+uploaded_file = st.file_uploader("", type=['conf'])
 
 if uploaded_file is not None:
     # Store the filename for the final download
     st.session_state.original_filename = uploaded_file.name
     
     # Decrypt button
-    if st.button("Decrypt File"):
+    if st.button("Дешифровать файл"):
         # Read file content as bytes
         ciphertext = uploaded_file.getvalue()
         plaintext_bytes = decrypt_data(ciphertext)
@@ -66,24 +66,24 @@ if uploaded_file is not None:
             # On success, store the decoded text in session state
             # Use 'latin-1' or 'utf-8' with error handling, as config files can have mixed encodings
             st.session_state.decrypted_text = plaintext_bytes.decode('latin-1')
-            st.success("File decrypted successfully! You can now edit the text below.")
+            st.success("Дешифровка успешна. Содержимое доступно в редакторе ниже.")
         else:
-            st.error("Decryption failed. The file might be invalid, corrupted, or not encrypted with the correct key.")
+            st.error("Ошибка дешифровки! Возможно, ваш файл устаревший или имеет неверный формат/ключ шифрования")
             st.session_state.decrypted_text = "" # Clear any old text
 
 # --- Step 2: Edit Text Area ---
 if st.session_state.decrypted_text:
-    st.header("2. Edit Content")
+    st.header("")
     
     # The text_area's content is now managed by session_state
     edited_text = st.text_area(
-        "You can edit the decrypted text here:",
+        "Значения таблиц [XXXX-SS-CPU] = target (частота) задаётся в Герцах (2.5ГГц=2500000Гц), значение trig (порог температуры) задаётся в градусах Цельсия, умноженных на 1000 (48000=48С*1000):",
         value=st.session_state.decrypted_text,
         height=400,
         key="editor" # Give it a key to easily access its current value
     )
     
-    st.header("3. Encrypt and Download")
+    st.header("")
     
     # --- Step 3: Encrypt and Download Button ---
     if edited_text:
@@ -95,7 +95,7 @@ if st.session_state.decrypted_text:
         
         # Provide the download button
         st.download_button(
-            label="Download Encrypted .conf File",
+            label="Сохранить .conf файл",
             data=final_ciphertext,
             file_name=f"edited_{st.session_state.original_filename}",
             mime="application/octet-stream" # A generic mime type for binary files
