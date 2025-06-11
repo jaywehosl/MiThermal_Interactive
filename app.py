@@ -62,7 +62,7 @@ def create_magisk_module_zip(encrypted_conf_data: bytes, original_conf_filename:
             f"author={module_author}\n"
             f"description={module_description}\n"
             "minMagisk=1900\n" # Minimum Magisk version (e.g., v19.0)
-            "# Don't show this module in Magisk Manager (if you want it hidden after install)
+            # Don't show this module in Magisk Manager (if you want it hidden after install)
             # updateJson=https://raw.githubusercontent.com/you/your-repo/main/update.json # Optional for updates
         ).encode('utf-8')
         zip_file.writestr("module.prop", module_prop_content)
