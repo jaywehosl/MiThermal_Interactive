@@ -103,7 +103,7 @@ if 'original_filename' not in st.session_state:
     st.session_state.original_filename = "encrypted.conf"
 
 st.subheader("")
-uploaded_file = st.file_uploader("Выберите .conf файл для редактирования:", type=['conf'], label_visibility="collapsed")
+uploaded_file = st.file_uploader("", type=['conf'], label_visibility="collapsed")
 
 if uploaded_file is not None:
     st.session_state.original_filename = uploaded_file.name
@@ -114,36 +114,32 @@ if uploaded_file is not None:
         
         if plaintext_bytes:
             try:
-                # Try decoding with utf-8 first, then latin-1 as a fallback
                 st.session_state.decrypted_text = plaintext_bytes.decode('utf-8')
             except UnicodeDecodeError:
-                st.session_state.decrypted_text = plaintext_bytes.decode('latin-1') # Fallback
+                st.session_state.decrypted_text = plaintext_bytes.decode('latin-1')
             st.success("Дешифровка успешна. Содержимое доступно в редакторе ниже.")
         else:
             st.error("Ошибка дешифровки! Возможно, файл поврежден, использует другой ключ, или это не зашифрованный .conf файл.")
             st.session_state.decrypted_text = ""
 
-# --- Step 2: Edit Text Area ---
 if st.session_state.decrypted_text:
-    st.subheader("2. Редактируйте содержимое файла")
-    st.caption("Значения таблиц [XXXX-SS-CPU] = target (частота) задаётся в Герцах (2.5ГГц=2500000Гц), значение trig (порог температуры) задаётся в градусах Цельсия, умноженных на 1000 (48000=48С*1000).")
+    st.subheader("")
+    st.caption("Значения таблиц [XXXX-SS-CPU]: target (частота) задаётся в Герцах (2.5ГГц=2500000Гц), значение trig (порог температуры) задаётся в градусах Цельсия, умноженных на 1000 (48000=48С*1000).")
     
     edited_text = st.text_area(
-        "Содержимое файла:",
+        "",
         value=st.session_state.decrypted_text,
         height=400,
         key="editor",
         label_visibility="collapsed"
     )
     
-    st.markdown("---")
-    st.subheader("3. Сохраните изменения")
+    st.markdown("")
+    st.subheader("")
     
-    # --- Step 3: Encrypt and Download Options ---
-    if edited_text: # Only show download if there's text to encrypt
+    if edited_text:
         try:
-            # Encode the edited text back to bytes (use the same encoding used for decoding, or a safe one)
-            final_plaintext_bytes = edited_text.encode('latin-1') # Using latin-1 for safety with potentially mixed content
+            final_plaintext_bytes = edited_text.encode('latin-1')
         except Exception as e:
             st.error(f"Ошибка кодирования текста перед шифрованием: {e}")
             final_plaintext_bytes = None
@@ -163,21 +159,19 @@ if st.session_state.decrypted_text:
                 )
             
             with col2:
-                # Create Magisk Module ZIP
                 try:
                     magisk_module_zip_data = create_magisk_module_zip(final_ciphertext, st.session_state.original_filename)
                     magisk_zip_filename = f"Magisk_MiThermal_{st.session_state.original_filename.replace('.conf', '')}.zip"
                     
                     st.download_button(
-                        label="📦 Скачать Magisk модуль (.zip)",
+                        label="📦 Скачать Magisk/KSU модуль (.zip)",
                         data=magisk_module_zip_data,
                         file_name=magisk_zip_filename,
                         mime="application/zip",
-                        help="Скачать файл, упакованный в ZIP-архив Magisk модуля для прошивки."
+                        help="Скачать файл, упакованный в ZIP-архив Magisk/KSU модуля для прошивки."
                     )
                 except Exception as e:
-                    st.error(f"Ошибка при создании Magisk модуля: {e}")
+                    st.error(f"Ошибка при создании Magisk/KSU модуля: {e}")
 
-# --- Footer or additional info ---
 st.markdown("---")
-st.caption("MiThermal Editor v0.2 | Пользуйтесь с осторожностью.")
+st.caption("MiThermal Interactive Editor is protected by Apache 2.0 Licence, visit http://www.apache.org/licenses/")
